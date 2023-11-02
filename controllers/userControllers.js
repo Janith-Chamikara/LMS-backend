@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 const bcrypt = require("bcryptjs");
 const redis = require("../utils/connectRedis");
@@ -39,10 +40,11 @@ const registerUser = async (req, res, next) => {
       "mails",
       "verifyOTP.ejs"
     );
+    console.log(templatePath);
     sendEmail(templatePath, email, "OTP Verification of LMS", data);
     res.status(200).json({
       success: true,
-      message: "Successfully registered user.",
+      message: "Verify your account.",
       token,
       activationKey,
     });
@@ -64,45 +66,50 @@ const createToken = (user = {}) => {
 
 const activateUser = async (req, res, next) => {
   const activationKeyFromBody = req.body.activationKey;
+  console.log(activationKeyFromBody);
   const authHeader = req.headers.Authorization || req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer")) {
     const token = authHeader.split(" ")[1];
     //const activationKeyFromHeader = authHeader.split(" ")[2];
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-      if (err) {
-        res.status(404);
-        throw new Error(
-          "Not a verified access token.Please refresh your token"
-        );
-      }
-      const {
-        activationKey,
-        user: { email, name, hashedPassword },
-      } = decoded;
-      if (activationKey.toString() !== activationKeyFromBody) {
-        throw new Error("Invalid Activation Code.");
-      }
-      const isExisitsUser = await User.findOne({ email });
+      try {
+        if (err) {
+          res.status(404);
+          throw new Error(
+            "Not a verified access token.Please refresh your token"
+          );
+        }
+        const {
+          activationKey,
+          user: { email, name, hashedPassword },
+        } = decoded;
+        if (activationKey.toString() !== activationKeyFromBody) {
+          throw new Error("Invalid Activation Code.");
+        }
+        const isExisitsUser = await User.findOne({ email });
 
-      if (isExisitsUser) {
-        res.status(404);
-        throw new Error("User/Email already exists.");
-      }
-      //try to send token from registration to activate
+        if (isExisitsUser) {
+          res.status(404);
+          throw new Error("User/Email already exists.");
+        }
+        //try to send token from registration to activate
 
-      const newUser = await User.create({
-        email,
-        name,
-        password: hashedPassword,
-      });
-      newUser &&
-        res.status(200).json({
-          success: true,
-          message: `Created new user Name - ${newUser.name} ID - ${newUser._id}`,
+        const newUser = await User.create({
+          email,
+          name,
+          password: hashedPassword,
         });
+        newUser &&
+          res.status(200).json({
+            success: true,
+            message: `Successfully registerd. Created new user, Name - ${newUser.name} ID - ${newUser._id}`,
+          });
+      } catch (error) {
+        return next(new ErrorHandler(error.message, 400));
+      }
     });
   } else {
-    return next(new ErrorHandler(error.message, 400));
+    return next(new ErrorHandler("Cannot find Access Token", 400));
   }
 };
 
@@ -125,7 +132,7 @@ const signInUser = async (req, res, next) => {
       isUserExists &&
       (await bcrypt.compare(password, isUserExists.password))
     ) {
-      sendToken(
+      const { accessToken, refreshToken } = await sendToken(
         {
           id: isUserExists._id,
           name: isUserExists.name,
@@ -134,9 +141,17 @@ const signInUser = async (req, res, next) => {
           roles: isUserExists.roles,
           courses: isUserExists.courses,
         },
-        200,
         res
       );
+      console.log(accessToken);
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Successfully logged in.Please wait...",
+          accessToken,
+          refreshToken,
+        });
     } else {
       throw new Error("Invalid Password.");
     }

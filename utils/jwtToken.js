@@ -13,7 +13,7 @@ const refreshCookieOptions = {
   secure: true,
   maxAge: Number(process.env.REFRESH_TOKEN_EXPIRES_IN) * 1000,
 };
-const sendToken = async (user = {}, statusCode, response) => {
+const sendToken = async (user = {}, response) => {
   const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN + "s" || "30s",
   });
@@ -32,11 +32,7 @@ const sendToken = async (user = {}, statusCode, response) => {
 
   //req.user = JSON.parse(cachedUser);
 
-  response.status(statusCode).json({
-    success: true,
-    accessToken,
-    refreshToken,
-  });
+  return { accessToken, refreshToken };
 };
 
 module.exports = { sendToken, accessCookieOptions, refreshCookieOptions };
