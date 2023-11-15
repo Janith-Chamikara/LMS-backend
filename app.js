@@ -13,6 +13,6 @@ app.use(
     origin: "*",
   })
 );
-app.use(errorHandler);
+
 
 module.exports = app;
