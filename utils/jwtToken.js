@@ -15,10 +15,10 @@ const refreshCookieOptions = {
 };
 const sendToken = async (user = {}, response) => {
   const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN + "s" || "30s",
+    expiresIn: "50min",
   });
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN + "s" || "5h",
+    expiresIn: "5h",
   });
   ///new Date(date.now())
 

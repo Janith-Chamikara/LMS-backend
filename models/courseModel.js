@@ -24,11 +24,11 @@ const questionSchema = new mongoose.Schema({
 });
 
 const courseInfoSchema = new mongoose.Schema({
-  videoUrl: String,
+  videoURL: String,
   videoThumbnail: Object,
-  title: String,
-  videoSection: String,
-  description: String,
+  videoTitle: String,
+  section: String,
+  videoDescription: String,
   videoLength: Number,
   videoPlayer: String,
   links: [linkSchema],
@@ -58,7 +58,7 @@ const courseSchema = new mongoose.Schema(
       url: { type: String, required: true },
     },
     tags: {
-      type: [String], // Changed to an array of strings
+      type: [{tag:String}], // Changed to an array of strings
       required: true,
     },
     level: {
@@ -69,8 +69,8 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    benifits: [{ title: String }],
-    preRequisties: [{ title: String }],
+    benifits: [{ benifit: String }],
+    preRequisties: [{ requirement: String }],
     reviews: [reviewSchema],
     ratings: Number,
     courseInfo: [courseInfoSchema],

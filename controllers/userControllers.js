@@ -121,7 +121,7 @@ const signInUser = async (req, res, next) => {
       throw new Error("Both email and password are required.");
     }
     const isUserExists = await User.findOne({ email }).select(
-      "password name email roles courses"
+      "password name email roles courses avatar"
     );
 
     if (!isUserExists) {
@@ -135,6 +135,7 @@ const signInUser = async (req, res, next) => {
       const { accessToken, refreshToken } = await sendToken(
         {
           id: isUserExists._id,
+          avatar:isUserExists.avatar,
           name: isUserExists.name,
           email: isUserExists.email,
           password: isUserExists.password,
@@ -144,14 +145,21 @@ const signInUser = async (req, res, next) => {
         res
       );
       console.log(accessToken);
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Successfully logged in.Please wait...",
-          accessToken,
-          refreshToken,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Successfully logged in.Please wait...",
+        accessToken,
+        refreshToken,
+        userInfo: {
+          avatar:isUserExists.avatar,
+          id: isUserExists._id,
+          name: isUserExists.name,
+          email: isUserExists.email,
+          password: isUserExists.password,
+          roles: isUserExists.roles,
+          courses: isUserExists.courses,
+        },
+      });
     } else {
       throw new Error("Invalid Password.");
     }

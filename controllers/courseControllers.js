@@ -9,17 +9,21 @@ const { sendEmail } = require("../utils/sendEmail.js");
 const path = require("path");
 const uploadCourse = async (req, res, next) => {
   try {
-    const data = req.body;
-    let { thumbnail } = data;
-    if (thumbnail.url) {
-      const cloud = await cloudinary.uploader.upload(thumbnail.url, {
+    const reqData = req.body;
+    console.log(req.body);
+    // console.log(reqData);
+    let { thumbnail } = reqData;
+    if (thumbnail) {
+      const cloud = await cloudinary.v2.uploader.upload(thumbnail.name, {
         folder: "courses",
       });
-      thumbnail = {
+      data.thumbnail = {
         public_id: cloud.public_id,
         url: cloud.secure_url,
       };
+      console.log(data.thumbnail.public_id);
     }
+
     await createCourse(data, res, next);
   } catch (error) {
     return next(new ErrorHandler(error.message), 404);
@@ -352,26 +356,26 @@ const getAllCoursesForAdmin = async (req, res, next) => {
   }
 };
 
-const deleteCourse = async(req, res, next) => {
+const deleteCourse = async (req, res, next) => {
   try {
-    const {id } = req.params;
+    const { id } = req.params;
     const course = await Course.findById(id);
-    if(!course){
-      return next(new ErrorHandler("Invalid course Id.",400))
+    if (!course) {
+      return next(new ErrorHandler("Invalid course Id.", 400));
     }
-    await Course.deleteOne({_id:id})
-    const JSONcourses = await redis.get("all-courses")
+    await Course.deleteOne({ _id: id });
+    const JSONcourses = await redis.get("all-courses");
     const courses = JSON.parse(JSONcourses);
-    const newCourses = courses.filter((item)=>item._id !== course._id)
-    await redis.set("all-courses",JSON.stringify(newCourses))
+    const newCourses = courses.filter((item) => item._id !== course._id);
+    await redis.set("all-courses", JSON.stringify(newCourses));
     res.status(200).json({
-      success:true,
-      message:`Successfully removed a course( id: ${course._id})`
-    })
+      success: true,
+      message: `Successfully removed a course( id: ${course._id})`,
+    });
   } catch (error) {
-    return next(new ErrorHandler(error.message,400))
+    return next(new ErrorHandler(error.message, 400));
   }
-}
+};
 
 module.exports = {
   uploadCourse,
@@ -385,5 +389,5 @@ module.exports = {
   addReview,
   addReplyToReview,
   getAllCoursesForAdmin,
-  deleteCourse
+  deleteCourse,
 };
