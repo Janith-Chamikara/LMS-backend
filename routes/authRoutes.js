@@ -20,7 +20,7 @@ router.route("/auth/register").post(registerUser);
 router.route("/auth/login").post(signInUser);
 router.route("/auth/logout").post(isAuthenticated, signOutUser);
 router.route("/auth/register/activate").post(activateUser);
-router.route("/auth/updateaccess").post(updateAccessToken);
+router.route("/auth/updateaccess").get(updateAccessToken);
 router.route("/auth/update-user-details").put(isAuthenticated, updateUserInfo);
 router.route("/auth/update-user-password").put(isAuthenticated, updatePassword);
 router

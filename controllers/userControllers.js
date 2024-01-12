@@ -135,7 +135,7 @@ const signInUser = async (req, res, next) => {
       const { accessToken, refreshToken } = await sendToken(
         {
           id: isUserExists._id,
-          avatar:isUserExists.avatar,
+          avatar: isUserExists.avatar,
           name: isUserExists.name,
           email: isUserExists.email,
           password: isUserExists.password,
@@ -145,13 +145,14 @@ const signInUser = async (req, res, next) => {
         res
       );
       console.log(accessToken);
+     
       res.status(200).json({
         success: true,
         message: "Successfully logged in.Please wait...",
         accessToken,
         refreshToken,
         userInfo: {
-          avatar:isUserExists.avatar,
+          avatar: isUserExists.avatar,
           id: isUserExists._id,
           name: isUserExists.name,
           email: isUserExists.email,
@@ -185,8 +186,11 @@ const signOutUser = async (req, res, next) => {
 
 const updateAccessToken = async (req, res, next) => {
   try {
-    if (req.cookies.refreshtoken) {
-      const refreshToken = req.cookies.refreshtoken;
+    console.log(req.headers);
+    console.log(req.cookies.refreshToken);
+    if (req.cookies.refreshToken) {
+      const refreshToken = req.cookies.refreshToken;
+      console.log(refreshToken);
 
       jwt.verify(
         refreshToken,
@@ -206,8 +210,8 @@ const updateAccessToken = async (req, res, next) => {
             process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: "3d" }
           );
-          res.cookie("accesstoken", newAccessToken, accessCookieOptions);
-          res.cookie("refreshtoken", newRefreshToken, refreshCookieOptions);
+          res.cookie("accessToken", newAccessToken, accessCookieOptions);
+          res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);
           await redis.set(
             id,
             JSON.stringify({ ...decoded, newRefreshToken, newAccessToken }),
@@ -224,11 +228,12 @@ const updateAccessToken = async (req, res, next) => {
     } else {
       throw new ErrorHandler(
         "Cannot find refresh token to update your access",
-        404
+        403
       );
     }
   } catch (error) {
-    return next(new ErrorHandler(error.message, 400));
+    console.log(error.message);
+    return next(new ErrorHandler(error.message, 403));
   }
 };
 

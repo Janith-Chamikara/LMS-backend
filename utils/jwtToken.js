@@ -3,19 +3,19 @@ require("dotenv").config();
 const redis = require("./connectRedis");
 const accessCookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: "None",
   secure: true,
   maxAge: Number(process.env.ACCESS_TOKEN_EXPIRES_IN) * 1000,
 };
 const refreshCookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: "None",
   secure: true,
   maxAge: Number(process.env.REFRESH_TOKEN_EXPIRES_IN) * 1000,
 };
 const sendToken = async (user = {}, response) => {
   const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "50min",
+    expiresIn: "70s",
   });
   const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: "5h",

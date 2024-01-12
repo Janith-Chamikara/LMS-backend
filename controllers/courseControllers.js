@@ -11,20 +11,21 @@ const uploadCourse = async (req, res, next) => {
   try {
     const reqData = req.body;
     console.log(req.body);
-    // console.log(reqData);
+    console.log(reqData);
     let { thumbnail } = reqData;
+    let { video } = reqData;
     if (thumbnail) {
-      const cloud = await cloudinary.v2.uploader.upload(thumbnail.name, {
+      const cloud = await cloudinary.v2.uploader.upload(thumbnail, {
         folder: "courses",
       });
-      data.thumbnail = {
+      reqData.thumbnail = {
         public_id: cloud.public_id,
         url: cloud.secure_url,
       };
-      console.log(data.thumbnail.public_id);
+      console.log(reqData);
     }
 
-    await createCourse(data, res, next);
+    await createCourse(reqData, res, next);
   } catch (error) {
     return next(new ErrorHandler(error.message), 404);
   }
@@ -100,24 +101,24 @@ const getSingleCourse = async (req, res, next) => {
 };
 const getAllCourses = async (req, res, next) => {
   try {
-    const coursesExistsInRedis = await redis.get("all-courses");
-    if (coursesExistsInRedis) {
-      const courses = JSON.parse(coursesExistsInRedis);
-      res.status(200).json({
-        success: true,
-        courses,
-      });
-    } else {
-      const courses = await Course.find().select(
-        "-courseInfo.videoUrl -courseInfo.suggestions -courseInfo.questions -courseInfo.links"
-      );
-      await redis.set("all-courses", JSON.stringify(courses));
-      res.status(200).json({
-        success: true,
-        courses,
-      });
-    }
+    // const coursesExistsInRedis = await redis.get("all-courses");
+    // if (coursesExistsInRedis) {
+    //   const courses = JSON.parse(coursesExistsInRedis);
+    //   res.status(200).json({
+    //     success: true,
+    //     courses,
+    //   });
+    // } else {
+    const courses = await Course.find().select(
+      "-courseInfo.suggestions -courseInfo.questions"
+    );
+    // await redis.set("all-courses", JSON.stringify(courses));
+    res.status(200).json({
+      success: true,
+      courses,
+    });
   } catch (error) {
+    console.log(error);
     return next(new ErrorHandler(error.message, 404));
   }
 };

@@ -16,10 +16,10 @@ const {
 const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 const router = express.Router();
 
-router.route("/courses/create").post(isAuthenticated, uploadCourse);
+router.route("/courses/create").post( uploadCourse);
 router.route("/courses/update/:id").put(isAuthenticated, isAdmin, updateCourse);
 router.route("/courses/get/:id").get(getSingleCourse);
-router.route("/courses/get-all").get(getAllCourses);
+router.route("/courses/get-all").get(isAuthenticated,getAllCourses);
 router
   .route("/courses/auth/get-paid-course/:id")
   .get(isAuthenticated, getPaidCourse);
