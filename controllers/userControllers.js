@@ -145,7 +145,7 @@ const signInUser = async (req, res, next) => {
         res
       );
       console.log(accessToken);
-     
+
       res.status(200).json({
         success: true,
         message: "Successfully logged in.Please wait...",
@@ -239,11 +239,18 @@ const updateAccessToken = async (req, res, next) => {
 
 const getUserInfo = async (req, res, next) => {
   try {
-    const { id } = req.user;
+    console.log(req.params);
+    const { id } = req.params;
     if (!id) {
-      throw new Error("Cannot find ID in req.user");
+      throw new Error("Cannot find ID in req.params");
     }
-    const user = await getUserById(id);
+    let user;
+    // if (await getUserById(id)) {
+    //   console.log("by redis");
+    //   user = await getUserById(id);
+    // } else {
+    user = await User.findById(id);
+
     res.status(200).json({
       success: true,
       user,

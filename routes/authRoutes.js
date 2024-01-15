@@ -27,7 +27,7 @@ router
   .route("/auth/update-profile-image")
   .post(isAuthenticated, updateProfileImage);
 
-router.route("/auth/me").post(isAuthenticated, getUserInfo);
+router.route("/auth/:id").get(isAuthenticated, getUserInfo);
 router
   .route("/auth/admin/get-all-users")
   .get(isAuthenticated, isAdmin, getAllUsersForAdmin);

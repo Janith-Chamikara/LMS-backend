@@ -150,6 +150,7 @@ const getPaidCourse = async (req, res, next) => {
 };
 const getPaidCourses = async (req, res, next) => {
   try {
+    console.log(req.user)
     const { courses } = req.user;
 
     if (!courses) {
