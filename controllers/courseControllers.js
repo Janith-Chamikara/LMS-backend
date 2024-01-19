@@ -34,7 +34,7 @@ const uploadCourse = async (req, res, next) => {
 const updateCourse = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { thumbnail, newName } = req.body;
+    const { thumbnail, name, level, price, estimatedPrice } = req.body;
     const course = await Course.findById(id);
     if (thumbnail) {
       await cloudinary.uploader.destroy(course.thumbnail.public_id);
@@ -47,7 +47,10 @@ const updateCourse = async (req, res, next) => {
       };
       course.thumbnail = newThumbnail;
     }
-    newName && (course.name = newName);
+    name && (course.name = name);
+    level && (course.level = level);
+    estimatedPrice && (course.estimatedPrice = estimatedPrice);
+    price && (course.price = price);
     const updatedCourse = await course.save();
     // const { id } = req.params;
     // const { data } = req.body;
@@ -68,6 +71,7 @@ const updateCourse = async (req, res, next) => {
     // const updatedCourse = await course.save();
     res.status(200).json({
       success: true,
+      message: "Successfully updated Course.",
       updatedCourse,
     });
   } catch (error) {
@@ -150,7 +154,7 @@ const getPaidCourse = async (req, res, next) => {
 };
 const getPaidCourses = async (req, res, next) => {
   try {
-    console.log(req.user)
+    console.log(req.user);
     const { courses } = req.user;
 
     if (!courses) {

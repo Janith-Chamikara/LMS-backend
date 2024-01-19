@@ -27,7 +27,9 @@ const isAuthenticated = async (req, res, next) => {
               );
             }
             const { id } = decoded;
+            console.log(decoded);
             const cachedUser = await redis.get(id);
+            console.log(cachedUser);
             if (!cachedUser) {
               throw new Error("Didn't found user in cached database.");
             }
@@ -55,7 +57,7 @@ const isAdmin = async (req, res, next) => {
   }
   const { roles } = req.user;
   console.log(roles);
-  if (roles === "admin") {
+  if (roles === "Admin") {
     return next();
   } else {
     res.status(200).json({
