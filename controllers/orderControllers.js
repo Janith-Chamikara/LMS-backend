@@ -46,6 +46,9 @@ const createOrder = async (req, res, next) => {
         name: user.name,
         email: user.email,
         courseName: course.name,
+        paymentInfo,
+        price: course.price,
+        thumbnail: course.thumbnail.url,
         courseId,
         date: new Date().toLocaleDateString("en-US", {
           year: "numeric",

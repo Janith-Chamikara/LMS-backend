@@ -28,6 +28,7 @@ const sendEmail = (templatePath,receiver, subject, content) => {
 
       transport.sendMail(mailOptions, (error, info) => {
         if (error) {
+          console.log(error)
           throw new Error("Error from sendMail(ejs).");
         }
         console.log("Email sended successfully.");

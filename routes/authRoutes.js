@@ -12,6 +12,7 @@ const {
   getAllUsersForAdmin,
   updateUserRoles,
   deleteUser,
+  createCheckoutSession,
 } = require("../controllers/userControllers");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 const router = express.Router();
@@ -35,4 +36,5 @@ router
   .route("/auth/admin/update-user-role/:id")
   .put(isAuthenticated, isAdmin, updateUserRoles);
 router.route("/auth/admin/delete-a-user/:id").delete(isAuthenticated,isAdmin,deleteUser)
+router.route("/auth/create-checkout-session").post(isAuthenticated,createCheckoutSession)
 module.exports = router;

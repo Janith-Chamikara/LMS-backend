@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const path = require("path");
-
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const bcrypt = require("bcryptjs");
 const redis = require("../utils/connectRedis");
 
@@ -372,6 +372,35 @@ const updateUserRoles = async (req, res, next) => {
   }
 };
 
+const createCheckoutSession = async (req, res) => {
+  const { course } = req.body;
+  const lineItems = [
+    {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: course.name,
+          images: [course.thumbnail.url],
+        },
+        unit_amount: course.price * 100,
+      },
+      quantity: 1,
+    },
+  ];
+
+  const session = await stripe.checkout.sessions.create({
+    line_items: lineItems,
+    mode: "payment",
+    success_url: "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
+    cancel_url: "http://localhost:5173/failed",
+    metadata: {
+      courseId:course._id,
+    },
+  });
+
+  res.status(200).json({ id: session.id });
+};
+
 const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -394,6 +423,7 @@ module.exports = {
   activateUser,
   signInUser,
   signOutUser,
+  createCheckoutSession,
   updateAccessToken,
   getUserInfo,
   updateUserInfo,
