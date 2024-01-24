@@ -36,6 +36,6 @@ router
   .route("/courses/auth/admin/get-all-courses")
   .get(isAuthenticated, isAdmin, getAllCoursesForAdmin);
 router
-  .route("/auth/admin/delete-a-course")
+  .route("/auth/admin/delete-a-course/:id")
   .delete(isAuthenticated, isAdmin, deleteCourse);
 module.exports = router;

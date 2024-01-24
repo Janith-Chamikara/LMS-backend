@@ -32,7 +32,7 @@ router
   .route("/auth/admin/get-all-users")
   .get(isAuthenticated, isAdmin, getAllUsersForAdmin);
 router
-  .route("/auth/admin/update-user-role")
+  .route("/auth/admin/update-user-role/:id")
   .put(isAuthenticated, isAdmin, updateUserRoles);
 router.route("/auth/admin/delete-a-user/:id").delete(isAuthenticated,isAdmin,deleteUser)
 module.exports = router;
