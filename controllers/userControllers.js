@@ -199,14 +199,14 @@ const updateAccessToken = async (req, res, next) => {
           if (err) {
             throw new ErrorHandler(err.message, 404);
           }
-          const { id, name, email, password, roles, courses } = decoded;
+          const { id, name, email, password, roles, courses, avatar } = decoded;
           const newAccessToken = jwt.sign(
-            { id, name, email, password, roles, courses },
+            { id, name, email, password, roles, courses, avatar },
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: "30s" }
           );
           const newRefreshToken = jwt.sign(
-            { id, name, email, password, roles, courses },
+            { id, name, email, password, roles, courses, avatar },
             process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: "3d" }
           );
@@ -391,10 +391,11 @@ const createCheckoutSession = async (req, res) => {
   const session = await stripe.checkout.sessions.create({
     line_items: lineItems,
     mode: "payment",
-    success_url: "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
+    success_url:
+      "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
     cancel_url: "http://localhost:5173/failed",
     metadata: {
-      courseId:course._id,
+      courseId: course._id,
     },
   });
 

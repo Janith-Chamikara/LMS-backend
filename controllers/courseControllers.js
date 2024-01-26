@@ -132,7 +132,7 @@ const getPaidCourse = async (req, res, next) => {
     const { courses } = req.user;
     const { id } = req.params;
     console.log(id);
-
+    console.log(courses);
     const courseExists = courses?.find((course) => course.course_id === id);
     console.log(courseExists);
     if (!courseExists) {
@@ -272,24 +272,27 @@ const addAnswer = async (req, res, next) => {
 
 const addReview = async (req, res, next) => {
   try {
-    const { courses } = req.user;
-    console.log(courses);
+    // const { courses } = req.user;
+    // console.log(courses);
     const { id } = req.params;
     const { comment, rating } = req.body;
-    const courseExists = courses?.find((item) => item.course_id === id);
-    if (!courseExists) {
-      return next(
-        new ErrorHandler(
-          "You cannot add a review to unpuarchased course.Please buy it to add a review",
-          404
-        )
-      );
-    }
-    const course = courseExists && (await Course.findById(id));
+    // const courseExists = courses?.find((item) => item.course_id === id);
+    // if (!courseExists) {
+    //   return next(
+    //     new ErrorHandler(
+    //       "You cannot add a review to unpuarchased course.Please buy it to add a review",
+    //       404
+    //     )
+    //   );
+    // }
+    const course = await Course.findById(id);
 
     if (comment || rating) {
       const newReview = {
-        user: { name: req.user.name, email: req.user.email },
+        name: req.user.name,
+        id: req.user.id,
+        avatar: req.user.avatar.url,
+        email: req.user.email,
         rating,
         comment,
       };
@@ -301,6 +304,7 @@ const addReview = async (req, res, next) => {
       const updatedCourse = await course.save();
       res.status(200).json({
         success: true,
+        message: "Successfully published your review",
         updatedCourse,
       });
       await Notification.create({

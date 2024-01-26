@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 
 const reviewSchema = new mongoose.Schema({
-  user: Object,
+  id: String,
+  avatar: String,
+  name: String,
   rating: {
     type: Number,
     default: 0,
@@ -9,7 +11,6 @@ const reviewSchema = new mongoose.Schema({
   comment: {
     type: String,
   },
-  commentReplies: [Object],
 });
 
 const linkSchema = new mongoose.Schema({
@@ -58,7 +59,7 @@ const courseSchema = new mongoose.Schema(
       url: { type: String, required: true },
     },
     tags: {
-      type: [{tag:String}], // Changed to an array of strings
+      type: [{ tag: String }], // Changed to an array of strings
       required: true,
     },
     level: {

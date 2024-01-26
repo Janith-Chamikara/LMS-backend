@@ -5,16 +5,16 @@ const User = require("../models/userModel");
 const Course = require("../models/courseModel");
 const { sendEmail } = require("../utils/sendEmail");
 const path = require("path");
-
+const redis = require("../utils/connectRedis");
 const createOrder = async (req, res, next) => {
   try {
     const { courseId, paymentInfo } = req.body;
     const user = await User.findById(req.user.id);
-
+    console.log(user);
     const courseExists = user.courses.find(
       (item) => item.course_id === courseId
     );
-
+    console.log(courseExists);
     if (courseExists) {
       return next(
         new ErrorHandler("You have already purchased the course.", 400)
@@ -34,7 +34,9 @@ const createOrder = async (req, res, next) => {
       const order = data && (await Order.create(data));
       order && user.courses.push({ course_id: courseId });
 
-      await user.save();
+      const newUser = await user.save();
+      console.log(newUser);
+      newUser && await redis.set(user._id, JSON.stringify(newUser), "EX", 432000);
 
       const templatePath = path.resolve(
         __dirname,
@@ -77,6 +79,7 @@ const createOrder = async (req, res, next) => {
         status: "unread",
       });
       res.status(200).json({
+        message: `Successfully purchased ${course.name}`,
         success: true,
         order,
       });

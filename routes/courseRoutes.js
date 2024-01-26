@@ -28,7 +28,7 @@ router
   .get(isAuthenticated, getPaidCourses);
 router.route("/courses/auth/add-question").put(isAuthenticated, addQuestion);
 router.route("/courses/auth/add-answer").put(isAuthenticated, addAnswer);
-router.route("/courses/auth/add-review/:id").put(isAuthenticated, addReview);
+router.route("/courses/auth/add-review/:id").post(isAuthenticated, addReview);
 router
   .route("/courses/auth/add-reply-to-review/")
   .put(isAuthenticated, isAdmin, addReplyToReview);

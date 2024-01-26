@@ -34,6 +34,7 @@ const isAuthenticated = async (req, res, next) => {
               throw new Error("Didn't found user in cached database.");
             }
             req.user = JSON.parse(cachedUser);
+            console.log(JSON.parse(cachedUser))
             next();
           } catch (error) {
             return next(new ErrorHandler(error.message, 404));
