@@ -12,14 +12,17 @@ const {
   addReplyToReview,
   getAllCoursesForAdmin,
   deleteCourse,
+  addToCart,
+  getCartItems,
 } = require("../controllers/courseControllers");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 const router = express.Router();
 
-router.route("/courses/create").post( uploadCourse);
+router.route("/courses/create").post(uploadCourse);
 router.route("/courses/update/:id").put(isAuthenticated, isAdmin, updateCourse);
 router.route("/courses/get/:id").get(getSingleCourse);
-router.route("/courses/get-all").get(isAuthenticated,getAllCourses);
+router.route("/courses/get-all").get(isAuthenticated, getAllCourses);
+router.route("/courses/get-cart-items/:id").get(isAuthenticated, getCartItems);
 router
   .route("/courses/auth/get-paid-course/:id")
   .get(isAuthenticated, getPaidCourse);
@@ -38,4 +41,5 @@ router
 router
   .route("/auth/admin/delete-a-course/:id")
   .delete(isAuthenticated, isAdmin, deleteCourse);
+router.route("/auth/courses/add-to-cart/:id").put(isAuthenticated, addToCart);
 module.exports = router;

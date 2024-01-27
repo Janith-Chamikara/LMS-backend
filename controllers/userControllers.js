@@ -121,7 +121,7 @@ const signInUser = async (req, res, next) => {
       throw new Error("Both email and password are required.");
     }
     const isUserExists = await User.findOne({ email }).select(
-      "password name email roles courses avatar"
+      "password name email roles courses avatar cart"
     );
 
     if (!isUserExists) {
@@ -141,6 +141,7 @@ const signInUser = async (req, res, next) => {
           password: isUserExists.password,
           roles: isUserExists.roles,
           courses: isUserExists.courses,
+          cart: isUserExists.cart,
         },
         res
       );
@@ -159,6 +160,7 @@ const signInUser = async (req, res, next) => {
           password: isUserExists.password,
           roles: isUserExists.roles,
           courses: isUserExists.courses,
+          cart: isUserExists.cart,
         },
       });
     } else {
@@ -199,16 +201,17 @@ const updateAccessToken = async (req, res, next) => {
           if (err) {
             throw new ErrorHandler(err.message, 404);
           }
-          const { id, name, email, password, roles, courses, avatar } = decoded;
+          const { id, name, email, password, roles, courses, avatar, cart } =
+            decoded;
           const newAccessToken = jwt.sign(
-            { id, name, email, password, roles, courses, avatar },
+            { id, name, email, password, roles, courses, avatar, cart },
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "30s" }
+            { expiresIn: "60s" }
           );
           const newRefreshToken = jwt.sign(
-            { id, name, email, password, roles, courses, avatar },
+            { id, name, email, password, roles, courses, avatar, cart },
             process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: "3d" }
+            { expiresIn: "1d" }
           );
           res.cookie("accessToken", newAccessToken, accessCookieOptions);
           res.cookie("refreshToken", newRefreshToken, refreshCookieOptions);

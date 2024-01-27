@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema(
         course_id: String,
       },
     ],
+    cart: [
+      {
+        course_id: String,
+      },
+    ],
   },
   { timestamps: true }
 );

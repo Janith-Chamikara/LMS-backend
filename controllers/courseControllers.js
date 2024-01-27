@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const Course = require("../models/courseModel.js");
+const User = require("../models/userModel.js");
 const Notification = require("../models/notificationModel.js");
 const { createCourse } = require("../services/courseServices.js");
 const { cloudinary } = require("../utils/cloudinary");
@@ -79,6 +80,35 @@ const updateCourse = async (req, res, next) => {
   }
 };
 
+const getCartItems = async (req, res, next) => {
+  try {
+    
+    const { cart } = req.user;
+    if (!cart) {
+      return next(new ErrorHandler("Cannot find user cart.", 404));
+    }
+    let courses;
+    if (cart.length > 0) {
+      const coursePromises = cart.map(async (cartItem) => {
+        const course = await Course.findById(cartItem.course_id);
+        return course;
+      });
+      courses = await Promise.all(coursePromises);
+    } else {
+      courses = [];
+    }
+    courses.length === 0
+      ? res.status(200).json({ success: true, message: "Your cart is empty" })
+      : res.status(200).json({
+          success: true,
+          courses,
+          message: "Cart items fetched successfully.",
+        });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 403));
+  }
+};
+
 const getSingleCourse = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -91,7 +121,7 @@ const getSingleCourse = async (req, res, next) => {
       });
     } else {
       const course = await Course.findById(id).select(
-        "-courseInfo.videoUrl -courseInfo.suggestions -courseInfo.questions -courseInfo.links"
+        "-courseInfo.suggestions -courseInfo.questions"
       );
       await redis.set(id, JSON.stringify(course));
       res.status(200).json({
@@ -154,7 +184,6 @@ const getPaidCourse = async (req, res, next) => {
 };
 const getPaidCourses = async (req, res, next) => {
   try {
-    console.log(req.user);
     const { courses } = req.user;
 
     if (!courses) {
@@ -304,7 +333,7 @@ const addReview = async (req, res, next) => {
       const updatedCourse = await course.save();
       res.status(200).json({
         success: true,
-        message: "Successfully published your review",
+        message: "Thanks for your review.It will be published here soon.",
         updatedCourse,
       });
       await Notification.create({
@@ -387,6 +416,44 @@ const deleteCourse = async (req, res, next) => {
   }
 };
 
+const addToCart = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return next(
+        new ErrorHandler("Not found req.user. Man be your token expired.", 400)
+      );
+    }
+    if (user.cart.length > 0) {
+      const courseExistsInCart = user.cart.find(
+        (cartItem) => cartItem.course_id === id
+      );
+      if (courseExistsInCart) {
+        return next(
+          new ErrorHandler("This course is in your cart already.", 400)
+        );
+      }
+    }
+
+    const course = await Course.findById(id);
+    if (!course) {
+      return next(
+        new ErrorHandler("Not found req.user. Man be your token expired.", 400)
+      );
+    }
+    const updatedCourse = user.cart.push({ course_id: id });
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Successfully added course to your cart.",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
+
 module.exports = {
   uploadCourse,
   updateCourse,
@@ -394,6 +461,8 @@ module.exports = {
   getAllCourses,
   getPaidCourse,
   getPaidCourses,
+  addToCart,
+  getCartItems,
   addQuestion,
   addAnswer,
   addReview,
