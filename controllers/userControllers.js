@@ -295,6 +295,17 @@ const updateUserInfo = async (req, res, next) => {
   }
 };
 
+const sendPasswordResetMail = async (req, res, next) => {
+  try {
+    const { enterdEmail } = req.body;
+    const { email } = req.user;
+    const isUserExists = await User.findOne({email})
+    if(!is)
+  } catch (error) {
+    return next(new ErrorHandler(error, 400));
+  }
+};
+
 const updatePassword = async (req, res, next) => {
   const { oldPassword, newPassword } = req.body;
   const { id, password } = req.user;
