@@ -297,10 +297,69 @@ const updateUserInfo = async (req, res, next) => {
 
 const sendPasswordResetMail = async (req, res, next) => {
   try {
-    const { enterdEmail } = req.body;
-    const { email } = req.user;
-    const isUserExists = await User.findOne({email})
-    if(!is)
+    const { email } = req.body;
+    const isUserExists = await User.findOne({ email });
+    if (!isUserExists) {
+      return next(
+        new ErrorHandler("Invalid Email Please give your correct email.", 404)
+      );
+    }
+    const token = jwt.sign(
+      { email, id: isUserExists._id },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "5m",
+      }
+    );
+    const url = `http://localhost:5173/resetPassword?token=${token}&id=${isUserExists._id}`;
+    const data = { url };
+    console.log(url);
+    const templatePath = path.resolve(
+      __dirname,
+      "..",
+      "mails",
+      "ResetPassword.ejs"
+    );
+    console.log(templatePath);
+    sendEmail(templatePath, email, "Password Restoration", data);
+    res.status(200).json({
+      success: true,
+      message: "An email will be sent you shortly.",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error, 400));
+  }
+};
+
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    if (!token) {
+      return next(
+        new ErrorHandler("Your Link for password restoration was expired.")
+      );
+    }
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+      try {
+        if (err) {
+          return next(new ErrorHandler(error.message, 404));
+        }
+        const { id, email } = decoded;
+        const user = await User.findById(id);
+        if (!user) {
+          return next(new ErrorHandler("Not authorized", 404));
+        }
+        const newHashedpassword = await bcrypt.hash(password, 10);
+        user.password = newHashedpassword;
+        await user.save();
+        res
+          .status(200)
+          .json({ success: true, message: "Successfully updated password." });
+      } catch (error) {
+        return next(new ErrorHandler(error, 400));
+      }
+    });
   } catch (error) {
     return next(new ErrorHandler(error, 400));
   }
@@ -443,7 +502,9 @@ module.exports = {
   getUserInfo,
   updateUserInfo,
   updatePassword,
+  sendPasswordResetMail,
   updateProfileImage,
+  forgotPassword,
   getAllUsersForAdmin,
   updateUserRoles,
   deleteUser,

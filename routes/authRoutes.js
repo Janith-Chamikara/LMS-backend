@@ -13,12 +13,16 @@ const {
   updateUserRoles,
   deleteUser,
   createCheckoutSession,
+  sendPasswordResetMail,
+  forgotPassword,
 } = require("../controllers/userControllers");
 const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 const router = express.Router();
 
 router.route("/auth/register").post(registerUser);
 router.route("/auth/login").post(signInUser);
+router.route("/auth/resetPassword/reset").post(forgotPassword);
+router.route("/auth/resetPassword").post(sendPasswordResetMail);
 router.route("/auth/logout").post(isAuthenticated, signOutUser);
 router.route("/auth/register/activate").post(activateUser);
 router.route("/auth/updateaccess").get(updateAccessToken);
@@ -35,6 +39,10 @@ router
 router
   .route("/auth/admin/update-user-role/:id")
   .put(isAuthenticated, isAdmin, updateUserRoles);
-router.route("/auth/admin/delete-a-user/:id").delete(isAuthenticated,isAdmin,deleteUser)
-router.route("/auth/create-checkout-session").post(isAuthenticated,createCheckoutSession)
+router
+  .route("/auth/admin/delete-a-user/:id")
+  .delete(isAuthenticated, isAdmin, deleteUser);
+router
+  .route("/auth/create-checkout-session")
+  .post(isAuthenticated, createCheckoutSession);
 module.exports = router;
