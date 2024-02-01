@@ -6,7 +6,7 @@ const { isAuthenticated, isAdmin } = require("../middlewares/auth");
 const router = express.Router();
 
 router
-  .route("/auth/get-all-notifications")
+  .route("/auth/notifications/getallnotifications")
   .get(isAuthenticated, isAdmin, getAllNotifications);
-router.route("/auth/update-notification-status/:id").put(isAuthenticated,isAdmin,updateNotificationStatus)
+router.route("/auth/notifications/update/status/:id").put(isAuthenticated,isAdmin,updateNotificationStatus)
 module.exports = router;

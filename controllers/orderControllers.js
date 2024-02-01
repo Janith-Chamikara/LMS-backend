@@ -28,7 +28,18 @@ const createOrder = async (req, res, next) => {
     if (courseId && paymentInfo) {
       const data = {
         courseId,
-        userId: user.id,
+        userName: user.name,
+        date: new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        userEmail: user.email,
+        thumbnail: course.thumbnail.url,
+        avatar: user.avatar.url,
+        courseName: course.name,
+        price: course.price,
+        userId: user._id,
         paymentInfo,
       };
       const order = data && (await Order.create(data));
@@ -36,7 +47,8 @@ const createOrder = async (req, res, next) => {
 
       const newUser = await user.save();
       console.log(newUser);
-      newUser && await redis.set(user._id, JSON.stringify(newUser), "EX", 432000);
+      newUser &&
+        (await redis.set(user._id, JSON.stringify(newUser), "EX", 432000));
 
       const templatePath = path.resolve(
         __dirname,
@@ -74,6 +86,11 @@ const createOrder = async (req, res, next) => {
           email: user.email,
           name: user.name,
         },
+        date: new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
         title: "New Order",
         message: `${user.name} has purchased ${course.name}`,
         status: "unread",

@@ -1,5 +1,5 @@
-const Notification = require("../models/notificationModel");
 const ErrorHandler = require("../utils/ErrorHandler");
+const Notification = require("../models/notificationModel");
 const corn = require("node-cron");
 
 const getAllNotifications = async (req, res, next) => {
@@ -13,6 +13,7 @@ const getAllNotifications = async (req, res, next) => {
       notifications,
     });
   } catch (error) {
+    console.log(error.message);
     return next(new ErrorHandler(error.message, 400));
   }
 };
@@ -48,7 +49,6 @@ corn.schedule("0 0 0 * * *", async () => {
       createdAt: { $lt: thirtyDays },
     }
   );
-  
 });
 
 module.exports = {

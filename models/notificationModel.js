@@ -2,13 +2,16 @@ const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema(
   {
-   customer:{
-    name:String,
-    email:String
-   },
+    customer: {
+      name: String,
+      email: String,
+    },
     title: {
       type: String,
       required: true,
+    },
+    date: {
+      type: String,
     },
     message: {
       type: String,

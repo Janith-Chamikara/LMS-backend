@@ -4,7 +4,6 @@ const path = require("path");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const bcrypt = require("bcryptjs");
 const redis = require("../utils/connectRedis");
-
 const { sendEmail } = require("../utils/sendEmail");
 const {
   sendToken,
@@ -18,18 +17,28 @@ const { cloudinary } = require("../utils/cloudinary");
 //POST route
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, profileImg } = req.body;
     if (!name || !email || !password) {
       throw new Error("All fields are mandatory.");
+    }
+    let url;
+    let public_id;
+    if (profileImg) {
+      const cloud = await cloudinary.v2.uploader.upload(profileImg, {
+        folder: "users",
+      });
+      public_id = cloud.public_id;
+      url = cloud.secure_url;
     }
     const isExisitsUser = await User.findOne({ email });
     if (isExisitsUser) {
       throw new Error("Email already in use.");
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const { token, activationKey } = createToken(
-      { name, email, hashedPassword }
+      { name, email, hashedPassword, public_id, url }
       //id
     );
 
@@ -44,7 +53,7 @@ const registerUser = async (req, res, next) => {
     sendEmail(templatePath, email, "OTP Verification of LMS", data);
     res.status(200).json({
       success: true,
-      message: "Verify your account.",
+      message: "An Email was sent you to verify your account.",
       token,
       activationKey,
     });
@@ -58,7 +67,7 @@ const createToken = (user = {}) => {
     { user: { ...user }, activationKey },
     process.env.JWT_SECRET,
     {
-      expiresIn: "50m",
+      expiresIn: "5m",
     }
   );
   return { token, activationKey };
@@ -79,9 +88,10 @@ const activateUser = async (req, res, next) => {
             "Not a verified access token.Please refresh your token"
           );
         }
+
         const {
           activationKey,
-          user: { email, name, hashedPassword },
+          user: { email, name, hashedPassword, public_id, url },
         } = decoded;
         if (activationKey.toString() !== activationKeyFromBody) {
           throw new Error("Invalid Activation Code.");
@@ -93,14 +103,36 @@ const activateUser = async (req, res, next) => {
           throw new Error("User/Email already exists.");
         }
         //try to send token from registration to activate
-
-        const newUser = await User.create({
+        const data = {
           email,
           name,
           password: hashedPassword,
-        });
+          avatar: {
+            public_id,
+            url,
+          },
+        };
+
+        const newUser = await User.create(data);
+        const payLoad = {
+          id: newUser._id,
+          avatar: newUser.avatar,
+          name: newUser.name,
+          email: newUser.email,
+          password: newUser.password,
+          roles: newUser.roles,
+          courses: newUser.courses,
+          cart: newUser.cart,
+        };
+        const refreshToken = jwt.sign(
+          payLoad,
+          process.env.REFRESH_TOKEN_SECRET,
+          { expiresIn: "5h" }
+        );
+        res.cookie("refreshToken", refreshToken, refreshCookieOptions);
         newUser &&
           res.status(200).json({
+            user:newUser,
             success: true,
             message: `Successfully registerd. Created new user, Name - ${newUser.name} ID - ${newUser._id}`,
           });
