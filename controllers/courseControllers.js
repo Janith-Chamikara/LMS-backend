@@ -82,7 +82,6 @@ const updateCourse = async (req, res, next) => {
 
 const getCartItems = async (req, res, next) => {
   try {
-    
     const { cart } = req.user;
     if (!cart) {
       return next(new ErrorHandler("Cannot find user cart.", 404));
@@ -184,6 +183,7 @@ const getPaidCourse = async (req, res, next) => {
 };
 const getPaidCourses = async (req, res, next) => {
   try {
+    console.log(req.user);
     const { courses } = req.user;
 
     if (!courses) {
@@ -443,7 +443,12 @@ const addToCart = async (req, res, next) => {
       );
     }
     const updatedCourse = user.cart.push({ course_id: id });
-    await user.save();
+    const newUser = await user.save();
+
+    await redis.set(
+      req.user.id,
+      JSON.stringify({ ...req.user, cart: newUser.cart })
+    );
 
     res.status(200).json({
       success: true,

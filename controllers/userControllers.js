@@ -132,7 +132,7 @@ const activateUser = async (req, res, next) => {
         res.cookie("refreshToken", refreshToken, refreshCookieOptions);
         newUser &&
           res.status(200).json({
-            user:newUser,
+            user: newUser,
             success: true,
             message: `Successfully registerd. Created new user, Name - ${newUser.name} ID - ${newUser._id}`,
           });
@@ -233,8 +233,10 @@ const updateAccessToken = async (req, res, next) => {
           if (err) {
             throw new ErrorHandler(err.message, 404);
           }
-          const { id, name, email, password, roles, courses, avatar, cart } =
-            decoded;
+          const { id } = decoded;
+          const cachedUser = await redis.get(id);
+          const user = JSON.parse(cachedUser);
+          const { name, email, password, roles, courses, avatar, cart } = user;
           const newAccessToken = jwt.sign(
             { id, name, email, password, roles, courses, avatar, cart },
             process.env.ACCESS_TOKEN_SECRET,

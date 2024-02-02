@@ -47,8 +47,9 @@ const createOrder = async (req, res, next) => {
 
       const newUser = await user.save();
       console.log(newUser);
-      newUser &&
-        (await redis.set(user._id, JSON.stringify(newUser), "EX", 432000));
+      
+      const redisUser =  (await redis.set(user._id, JSON.stringify(newUser), "EX", 432000));
+      console.log(redisUser);
 
       const templatePath = path.resolve(
         __dirname,
