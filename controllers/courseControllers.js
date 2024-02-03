@@ -11,6 +11,7 @@ const path = require("path");
 const uploadCourse = async (req, res, next) => {
   try {
     const reqData = req.body;
+
     console.log(req.body);
     console.log(reqData);
     let { thumbnail } = reqData;
@@ -82,10 +83,13 @@ const updateCourse = async (req, res, next) => {
 
 const getCartItems = async (req, res, next) => {
   try {
-    const { cart } = req.user;
-    if (!cart) {
-      return next(new ErrorHandler("Cannot find user cart.", 404));
-    }
+    const { id } = req.params;
+    // const { cart } = req.user;
+    // if (!cart) {
+    //   return next(new ErrorHandler("Cannot find user cart.", 404));
+    // }
+    const user = await User.findById(id);
+    const cart = user.cart;
     let courses;
     if (cart.length > 0) {
       const coursePromises = cart.map(async (cartItem) => {
@@ -184,15 +188,16 @@ const getPaidCourse = async (req, res, next) => {
 const getPaidCourses = async (req, res, next) => {
   try {
     console.log(req.user);
-    const { courses } = req.user;
 
-    if (!courses) {
+    const { id } = req.user;
+    const user = await User.findById(id)
+    if (!user.courses) {
       return next(
         new ErrorHandler("Courses not found.Please log in again.", 404)
       );
     }
     const purchasedCourses = await Promise.all(
-      courses.map((item) => Course.findById(item.course_id))
+      user.courses.map((item) => Course.findById(item.course_id))
     );
 
     res.status(200).json({
@@ -442,7 +447,7 @@ const addToCart = async (req, res, next) => {
         new ErrorHandler("Not found req.user. Man be your token expired.", 400)
       );
     }
-    const updatedCourse = user.cart.push({ course_id: id });
+    user.cart.push({ course_id: id });
     const newUser = await user.save();
 
     await redis.set(

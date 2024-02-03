@@ -70,6 +70,10 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    createdBy: {
+      name: String,
+      email: String,
+    },
     benifits: [{ benifit: String }],
     preRequisties: [{ requirement: String }],
     reviews: [reviewSchema],
