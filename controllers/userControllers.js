@@ -4,6 +4,7 @@ const path = require("path");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const bcrypt = require("bcryptjs");
 const redis = require("../utils/connectRedis");
+const Notification = require("../models/notificationModel")
 const { sendEmail } = require("../utils/sendEmail");
 const {
   sendToken,
@@ -129,7 +130,18 @@ const activateUser = async (req, res, next) => {
           process.env.REFRESH_TOKEN_SECRET,
           { expiresIn: "5h" }
         );
+        redis.set(newUser._id, JSON.stringify(newUser), "EX", 432000);
         res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+        await Notification.create({
+          customer: {
+            name: newUser.name,
+            email: newUser.email,
+            id: newUser._id,
+          },
+          status: "unread",
+          title: `New User Signed Up`,
+          message: `New user - ${newUser.name} has signed into your site . ID - ${newUser._id}`,
+        });
         newUser &&
           res.status(200).json({
             user: newUser,
@@ -301,28 +313,25 @@ const getUserInfo = async (req, res, next) => {
 
 const updateUserInfo = async (req, res, next) => {
   try {
-    const { name, email } = req.body;
+    const { name } = req.body;
 
     const { id } = req.user;
     const user = await User.findOne({ _id: id });
     //need to confirm whether the given email already in use or not
-    const emailAlreadyInUse = email && (await User.findOne({ email }));
-    if (emailAlreadyInUse) {
-      throw new Error("Email already in DB,Use another one", 404);
-    } else {
-      email && (user.email = email);
-    }
+    // const emailAlreadyInUse = email && (await User.findOne({ email }));
+    // if (emailAlreadyInUse) {
+    //   throw new Error("Email already in DB,Use another one", 404);
+    // } else {
+    //   email && (user.email = email);
+    // }
     name && (user.name = name);
     await user.save();
-    redis.set(
-      id,
-      JSON.stringify({ ...req.user, name: user.name, email: user.email })
-    );
+    console.log(name);
+    redis.set(id, JSON.stringify({ ...req.user, name: user.name }));
     res.status(200).json({
       success: true,
-      message: `Updated fileds ${
-        emailAlreadyInUse ? "Name" : "Name and Email"
-      } `,
+      name,
+      message: "Successfully updated your name",
     });
   } catch (error) {
     return next(new ErrorHandler(error, 404));
@@ -456,8 +465,10 @@ const getAllUsersForAdmin = async (req, res, next) => {
 
 const updateUserRoles = async (req, res, next) => {
   try {
-    const { id, role } = req.body;
-    if (!role || !id) {
+    const { id } = req.params;
+    console.log(id);
+    const { role } = req.body;
+    if (!role) {
       return next(
         new ErrorHandler("Cannot update user roles without role and id.", 404)
       );
@@ -468,10 +479,11 @@ const updateUserRoles = async (req, res, next) => {
     }
     if (role) {
       user.roles = role;
-      await user.save();
+      const updatedUser = await user.save();
       res.status(200).json({
         success: true,
         message: "Role updated",
+        updatedUser,
       });
     }
   } catch (error) {

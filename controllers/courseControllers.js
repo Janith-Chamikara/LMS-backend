@@ -28,6 +28,16 @@ const uploadCourse = async (req, res, next) => {
     }
 
     await createCourse(reqData, res, next);
+    await Notification.create({
+      customer: {
+        name: req.user.name,
+        email: req.user.email,
+        id: req.user.id,
+      },
+      status: "unread",
+      title: `New Course was added`,
+      message: `New course - ${reqData.name} has been uploaded by ${req.user.name}`,
+    });
   } catch (error) {
     return next(new ErrorHandler(error.message), 404);
   }
@@ -190,7 +200,7 @@ const getPaidCourses = async (req, res, next) => {
     console.log(req.user);
 
     const { id } = req.user;
-    const user = await User.findById(id)
+    const user = await User.findById(id);
     if (!user.courses) {
       return next(
         new ErrorHandler("Courses not found.Please log in again.", 404)
