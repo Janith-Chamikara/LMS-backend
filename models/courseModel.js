@@ -14,7 +14,6 @@ const reviewSchema = new mongoose.Schema({
 });
 
 const linkSchema = new mongoose.Schema({
-  title: String,
   url: String,
 });
 
@@ -41,7 +40,7 @@ const courseSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: [true, "Please provide a name for your course."],
+      required: [true, "Please provide a name for your course."],
     },
     description: {
       type: String,
@@ -72,6 +71,7 @@ const courseSchema = new mongoose.Schema(
     },
     createdBy: {
       name: String,
+      url:String,
       email: String,
     },
     benifits: [{ benifit: String }],

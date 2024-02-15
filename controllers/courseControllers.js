@@ -169,6 +169,29 @@ const getAllCourses = async (req, res, next) => {
     return next(new ErrorHandler(error.message, 404));
   }
 };
+const getAllCoursesAbstractive = async (req, res, next) => {
+  try {
+    // const coursesExistsInRedis = await redis.get("all-courses");
+    // if (coursesExistsInRedis) {
+    //   const courses = JSON.parse(coursesExistsInRedis);
+    //   res.status(200).json({
+    //     success: true,
+    //     courses,
+    //   });
+    // } else {
+    const courses = await Course.find().select(
+      "-courseInfo -reviews -benifits -preRequisties -ratings -purchased -level"
+    );
+    // await redis.set("all-courses", JSON.stringify(courses));
+    res.status(200).json({
+      success: true,
+      courses,
+    });
+  } catch (error) {
+    console.log(error);
+    return next(new ErrorHandler(error.message, 404));
+  }
+};
 
 const getPaidCourse = async (req, res, next) => {
   try {
@@ -479,6 +502,7 @@ module.exports = {
   updateCourse,
   getSingleCourse,
   getAllCourses,
+  getAllCoursesAbstractive,
   getPaidCourse,
   getPaidCourses,
   addToCart,

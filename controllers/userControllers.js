@@ -4,7 +4,7 @@ const path = require("path");
 const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const bcrypt = require("bcryptjs");
 const redis = require("../utils/connectRedis");
-const Notification = require("../models/notificationModel")
+const Notification = require("../models/notificationModel");
 const { sendEmail } = require("../utils/sendEmail");
 const {
   sendToken,
@@ -437,7 +437,7 @@ const updateProfileImage = async (req, res, next) => {
     const newAvatarCloud =
       avatar &&
       (await cloudinary.uploader.upload(avatar, {
-        folder: "avatars",
+        folder: "users",
       }));
     const newAvatar = {
       public_id: newAvatarCloud?.public_id,
