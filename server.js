@@ -13,12 +13,12 @@ const analyticsRoute = require("./routes/analyticsRoute");
 const layoutRoute = require("./routes/layoutRoute");
 const errorHandler = require("./middlewares/errorHandler");
 
-app.use("/", authRoute);
-app.use("/", courseRoute);
-app.use("/", orderRoute);
-app.use("/", notificationRoute);
-app.use("/", analyticsRoute);
-app.use("/", layoutRoute);
+app.use("/api", authRoute);
+app.use("/api", courseRoute);
+app.use("/api", orderRoute);
+app.use("/api", notificationRoute);
+app.use("/api", analyticsRoute);
+app.use("/api", layoutRoute);
 
 app.use("/", errorHandler);
 
