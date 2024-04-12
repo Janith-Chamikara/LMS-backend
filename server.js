@@ -27,4 +27,4 @@ app.use("/api", errorHandler);
 app.listen(port, () => console.log(`Server started at port - ${port}`));
 connectDB();
 
-export default app;
+module.exports = app;
