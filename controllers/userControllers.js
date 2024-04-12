@@ -236,7 +236,6 @@ const updateAccessToken = async (req, res, next) => {
     console.log(req.cookies.refreshToken);
     if (req.cookies.refreshToken) {
       const refreshToken = req.cookies.refreshToken;
-      console.log(refreshToken);
 
       jwt.verify(
         refreshToken,
@@ -276,7 +275,7 @@ const updateAccessToken = async (req, res, next) => {
       );
     } else {
       throw new ErrorHandler(
-        "Cannot find refresh token to update your access",
+        "Refresh token expired .Try to login again",
         403
       );
     }
