@@ -220,14 +220,10 @@ const getPaidCourse = async (req, res, next) => {
 };
 const getPaidCourses = async (req, res, next) => {
   try {
-    console.log(req.user);
-
     const { id } = req.user;
     const user = await User.findById(id);
     if (!user.courses) {
-      return next(
-        new ErrorHandler("Courses not found.Please log in again.", 404)
-      );
+      throw new Error("Courses not found.Please log in again.");
     }
     const purchasedCourses = await Promise.all(
       user.courses.map((item) => Course.findById(item.course_id))
@@ -238,7 +234,7 @@ const getPaidCourses = async (req, res, next) => {
       purchasedCourses,
     });
   } catch (error) {
-    return next(new ErrorHandler(error.message, 404));
+    next(new ErrorHandler(error.message, 404));
   }
 };
 
