@@ -274,10 +274,7 @@ const updateAccessToken = async (req, res, next) => {
         }
       );
     } else {
-      throw new ErrorHandler(
-        "Refresh token expired .Try to login again",
-        403
-      );
+      throw new ErrorHandler("Refresh token expired .Try to login again", 403);
     }
   } catch (error) {
     console.log(error.message);
@@ -353,7 +350,7 @@ const sendPasswordResetMail = async (req, res, next) => {
         expiresIn: "5m",
       }
     );
-    const url = `http://localhost:5173/resetPassword?token=${token}&id=${isUserExists._id}`;
+    const url = `${process.env.ORIGIN}/resetPassword?token=${token}&id=${isUserExists._id}`;
     const data = { url };
     console.log(url);
     const templatePath = path.resolve(
