@@ -374,17 +374,15 @@ const forgotPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;
     if (!token) {
-      return next(
-        new ErrorHandler("Your Link for password restoration was expired.")
-      );
+      throw new Error("Your Link for password restoration was expired.");
     }
 
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
       try {
         if (err) {
-          return next(new ErrorHandler(error.message, 404));
+          throw new Error(err.message);
         }
-        const { id, email } = decoded;
+        const { id } = decoded;
         const user = await User.findById(id);
         if (!user) {
           return next(new ErrorHandler("Not authorized", 404));
