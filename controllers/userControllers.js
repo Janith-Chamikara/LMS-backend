@@ -382,7 +382,7 @@ const forgotPassword = async (req, res, next) => {
         if (err) {
           throw new Error(err.message);
         }
-        const { id, email } = decoded;
+        const { id } = decoded;
         const user = await User.findById(id);
         if (!user) {
           return next(new ErrorHandler("Not authorized", 404));
