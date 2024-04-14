@@ -505,8 +505,8 @@ const createCheckoutSession = async (req, res) => {
     line_items: lineItems,
     mode: "payment",
     success_url:
-      "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
-    cancel_url: "http://localhost:5173/failed",
+      `${process.env.ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.ORIGIN}/failed`,
     metadata: {
       courseId: course._id,
     },
