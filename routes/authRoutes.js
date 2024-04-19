@@ -44,5 +44,5 @@ router
   .delete(isAuthenticated, isAdmin, deleteUser);
 router
   .route("/auth/create-checkout-session")
-  .post(isAuthenticated, createCheckoutSession);
+  .post(createCheckoutSession);
 module.exports = router;
